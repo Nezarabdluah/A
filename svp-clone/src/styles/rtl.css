@@ -1,0 +1,71 @@
+/* ========================================
+   RTL (Right-to-Left) Support
+   ======================================== */
+
+[dir="rtl"] {
+    direction: rtl;
+    text-align: right;
+}
+
+[dir="rtl"] .ml-auto {
+    margin-left: 0;
+    margin-right: auto;
+}
+
+[dir="rtl"] .mr-auto {
+    margin-right: 0;
+    margin-left: auto;
+}
+
+/* Flip margins */
+[dir="rtl"] .ml-2 {
+    margin-left: 0;
+    margin-right: var(--spacing-2);
+}
+
+[dir="rtl"] .ml-4 {
+    margin-left: 0;
+    margin-right: var(--spacing-4);
+}
+
+[dir="rtl"] .mr-2 {
+    margin-right: 0;
+    margin-left: var(--spacing-2);
+}
+
+[dir="rtl"] .mr-4 {
+    margin-right: 0;
+    margin-left: var(--spacing-4);
+}
+
+/* Flip paddings */
+[dir="rtl"] .pl-2 {
+    padding-left: 0;
+    padding-right: var(--spacing-2);
+}
+
+[dir="rtl"] .pl-4 {
+    padding-left: 0;
+    padding-right: var(--spacing-4);
+}
+
+[dir="rtl"] .pr-2 {
+    padding-right: 0;
+    padding-left: var(--spacing-2);
+}
+
+[dir="rtl"] .pr-4 {
+    padding-right: 0;
+    padding-left: var(--spacing-4);
+}
+
+/* Arabic Typography Adjustments */
+[dir="rtl"] {
+    letter-spacing: 0;
+}
+
+[dir="rtl"] h1,
+[dir="rtl"] h2,
+[dir="rtl"] h3 {
+    letter-spacing: -0.02em;
+}

@@ -1,0 +1,21 @@
+<svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_681_5821)">
+<circle cx="40" cy="40" r="40" fill="#FFBC1F"/>
+<circle opacity="0.8" cx="40" cy="40" r="40" fill="white"/>
+<path d="M48.3333 56.6667H31.6667C30.9833 56.6667 30.4167 56.1 30.4167 55.4167C30.4167 54.7333 30.9833 54.1667 31.6667 54.1667H48.3333C49.0167 54.1667 49.5833 54.7333 49.5833 55.4167C49.5833 56.1 49.0167 56.6667 48.3333 56.6667Z" fill="#14415A"/>
+<path d="M53.9167 29.2L47.25 33.9667C46.3667 34.6 45.1 34.2167 44.7167 33.2L41.5667 24.8C41.0333 23.35 38.9833 23.35 38.45 24.8L35.2833 33.1833C34.9 34.2167 33.65 34.6 32.7667 33.95L26.1 29.1833C24.7667 28.25 23 29.5667 23.55 31.1167L30.4833 50.5333C30.7167 51.2 31.35 51.6333 32.05 51.6333H47.9333C48.6333 51.6333 49.2667 51.1833 49.5 50.5333L56.4333 31.1167C57 29.5667 55.2333 28.25 53.9167 29.2ZM44.1667 44.5833H35.8333C35.15 44.5833 34.5833 44.0167 34.5833 43.3333C34.5833 42.65 35.15 42.0833 35.8333 42.0833H44.1667C44.85 42.0833 45.4167 42.65 45.4167 43.3333C45.4167 44.0167 44.85 44.5833 44.1667 44.5833Z" fill="#14415A"/>
+<g opacity="0.5" filter="url(#filter0_f_681_5821)">
+<ellipse cx="17.5" cy="15" rx="15.5" ry="15" fill="#73E0A9"/>
+</g>
+</g>
+<defs>
+<filter id="filter0_f_681_5821" x="-18" y="-20" width="71" height="70" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="10" result="effect1_foregroundBlur_681_5821"/>
+</filter>
+<clipPath id="clip0_681_5821">
+<rect width="80" height="80" rx="40" fill="white"/>
+</clipPath>
+</defs>
+</svg>

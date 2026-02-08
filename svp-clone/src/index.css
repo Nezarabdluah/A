@@ -1,0 +1,69 @@
+@import "tailwindcss";
+
+@import "./styles/variables.css";
+@import "./styles/typography.css";
+@import "./styles/rtl.css";
+
+@theme {
+  /* Colors - Primary (Saudi Arabia Green) */
+  --color-primary-50: #e8f5e9;
+  --color-primary-100: #c8e6c9;
+  --color-primary-200: #a5d6a7;
+  --color-primary-300: #81c784;
+  --color-primary-400: #66bb6a;
+  --color-primary-500: #165e3f;
+  --color-primary-600: #124b32;
+  --color-primary-700: #0e3a26;
+  --color-primary-800: #0a291a;
+  --color-primary-900: #06180e;
+  --color-primary: #165e3f;
+
+  /* Colors - Secondary (Gold) */
+  --color-secondary-50: #fffbf0;
+  --color-secondary-100: #fef3d0;
+  --color-secondary-200: #fde8a8;
+  --color-secondary-300: #fbdd80;
+  --color-secondary-400: #f9d158;
+  --color-secondary-500: #d4af37;
+  --color-secondary-600: #b8992d;
+  --color-secondary-700: #9c8324;
+  --color-secondary-800: #806d1b;
+  --color-secondary-900: #645712;
+  --color-secondary: #d4af37;
+
+  /* Fonts */
+  --font-sans: 'Cairo', 'Tajawal', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-arabic: 'Cairo', 'Tajawal', sans-serif;
+  --font-english: 'Roboto', 'Arial', sans-serif;
+}
+
+:root {
+  font-family: var(--font-sans);
+}
+
+body {
+  background-color: #ffffff;
+  color: #1a1a1a;
+  min-height: 100vh;
+  font-size: 1rem;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-gray-100);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-gray-300);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-gray-400);
+}
