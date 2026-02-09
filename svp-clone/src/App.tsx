@@ -37,13 +37,10 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
 }
 
 
+
 function App() {
-  console.log("App is rendering...");
   return (
     <ErrorBoundary>
-      <div style={{ position: 'fixed', top: 0, left: 0, background: 'yellow', color: 'black', padding: '5px', zIndex: 99999 }}>
-        DEBUG: App Component Loaded
-      </div>
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<VerificationPage />} />

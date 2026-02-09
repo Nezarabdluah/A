@@ -1,31 +1,20 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>svp-clone</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  </head>
-  <body>
-    <div id="root">
-      <div style="font-family: sans-serif; text-align: center; padding-top: 50px;">
-        <h1>Loading Application...</h1>
-        <p>If this message stays for more than 10 seconds, check the console for errors.</p>
-      </div>
-    </div>
-    <script>
-      window.onerror = function(message, source, lineno, colno, error) {
-        var root = document.getElementById('root');
-        root.innerHTML += '<div style="color:red; text-align:left; background:#fff0f0; padding:20px; border:1px solid red; margin:20px; border-radius:8px; z-index:9999; position:relative;">' +
-          '<h3>Critical Startup Error:</h3>' +
-          '<p><strong>Message:</strong> ' + message + '</p>' +
-          '<p><strong>Source:</strong> ' + source + ':' + lineno + '</p>' +
-          '</div>';
-      };
-    </script>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>svp-clone</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+
 </html>
