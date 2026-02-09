@@ -1,16 +1,14 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
-const { pool, poolConnect, sql } = require('../database/db');
+const db = require('../database/db');
 
 const router = express.Router();
 
 // Get all users (admin only)
 router.get('/', async (req, res) => {
     try {
-        await poolConnect;
-        const result = await pool.request()
-            .query('SELECT id, email, first_name, last_name, role, created_at FROM users ORDER BY created_at DESC');
-        res.json(result.recordset);
+        const result = await db.query('SELECT id, email, first_name, last_name, role, created_at FROM users ORDER BY created_at DESC');
+        res.json(result.rows);
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
@@ -19,16 +17,16 @@ router.get('/', async (req, res) => {
 // Get single user
 router.get('/:id', async (req, res) => {
     try {
-        await poolConnect;
-        const result = await pool.request()
-            .input('id', sql.Int, req.params.id)
-            .query('SELECT id, email, first_name, last_name, role, created_at FROM users WHERE id = @id');
+        const result = await db.query(
+            'SELECT id, email, first_name, last_name, role, created_at FROM users WHERE id = $1',
+            [req.params.id]
+        );
 
-        if (result.recordset.length === 0) {
+        if (result.rows.length === 0) {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        res.json(result.recordset[0]);
+        res.json(result.rows[0]);
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
@@ -37,15 +35,12 @@ router.get('/:id', async (req, res) => {
 // Create user (admin)
 router.post('/', async (req, res) => {
     try {
-        await poolConnect;
         const { email, password, firstName, lastName, role } = req.body;
 
         // Check if user exists
-        const existing = await pool.request()
-            .input('email', sql.NVarChar, email)
-            .query('SELECT id FROM users WHERE email = @email');
+        const existing = await db.query('SELECT id FROM users WHERE email = $1', [email]);
 
-        if (existing.recordset.length > 0) {
+        if (existing.rows.length > 0) {
             return res.status(400).json({ message: 'User already exists' });
         }
 
@@ -54,15 +49,12 @@ router.post('/', async (req, res) => {
         const passwordHash = await bcrypt.hash(password, salt);
 
         // Insert user
-        const result = await pool.request()
-            .input('email', sql.NVarChar, email)
-            .input('password_hash', sql.NVarChar, passwordHash)
-            .input('first_name', sql.NVarChar, firstName)
-            .input('last_name', sql.NVarChar, lastName)
-            .input('role', sql.NVarChar, role || 'user')
-            .query('INSERT INTO users (email, password_hash, first_name, last_name, role) OUTPUT INSERTED.id VALUES (@email, @password_hash, @first_name, @last_name, @role)');
+        const result = await db.query(
+            'INSERT INTO users (email, password_hash, first_name, last_name, role) VALUES ($1, $2, $3, $4, $5) RETURNING id',
+            [email, passwordHash, firstName, lastName, role || 'user']
+        );
 
-        res.status(201).json({ message: 'User created', id: result.recordset[0].id });
+        res.status(201).json({ message: 'User created', id: result.rows[0].id });
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
@@ -71,16 +63,12 @@ router.post('/', async (req, res) => {
 // Update user
 router.put('/:id', async (req, res) => {
     try {
-        await poolConnect;
         const { email, firstName, lastName, role } = req.body;
 
-        await pool.request()
-            .input('id', sql.Int, req.params.id)
-            .input('email', sql.NVarChar, email)
-            .input('first_name', sql.NVarChar, firstName)
-            .input('last_name', sql.NVarChar, lastName)
-            .input('role', sql.NVarChar, role)
-            .query('UPDATE users SET email = @email, first_name = @first_name, last_name = @last_name, role = @role, updated_at = GETDATE() WHERE id = @id');
+        await db.query(
+            'UPDATE users SET email = $1, first_name = $2, last_name = $3, role = $4, updated_at = NOW() WHERE id = $5',
+            [email, firstName, lastName, role, req.params.id]
+        );
 
         res.json({ message: 'User updated' });
     } catch (error) {
@@ -91,16 +79,15 @@ router.put('/:id', async (req, res) => {
 // Update user password
 router.put('/:id/password', async (req, res) => {
     try {
-        await poolConnect;
         const { password } = req.body;
 
         const salt = await bcrypt.genSalt(10);
         const passwordHash = await bcrypt.hash(password, salt);
 
-        await pool.request()
-            .input('id', sql.Int, req.params.id)
-            .input('password_hash', sql.NVarChar, passwordHash)
-            .query('UPDATE users SET password_hash = @password_hash, updated_at = GETDATE() WHERE id = @id');
+        await db.query(
+            'UPDATE users SET password_hash = $1, updated_at = NOW() WHERE id = $2',
+            [passwordHash, req.params.id]
+        );
 
         res.json({ message: 'Password updated' });
     } catch (error) {
@@ -111,10 +98,7 @@ router.put('/:id/password', async (req, res) => {
 // Delete user
 router.delete('/:id', async (req, res) => {
     try {
-        await poolConnect;
-        await pool.request()
-            .input('id', sql.Int, req.params.id)
-            .query('DELETE FROM users WHERE id = @id');
+        await db.query('DELETE FROM users WHERE id = $1', [req.params.id]);
         res.json({ message: 'User deleted' });
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });

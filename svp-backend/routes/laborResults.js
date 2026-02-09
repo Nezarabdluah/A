@@ -1,25 +1,23 @@
 const express = require('express');
-const { pool, poolConnect, sql } = require('../database/db');
+const db = require('../database/db');
 
 const router = express.Router();
 
 // Check labor result (public)
 router.get('/check', async (req, res) => {
     try {
-        await poolConnect;
         const { passportNumber, occupationKey, nationalityCode } = req.query;
 
-        const result = await pool.request()
-            .input('passportNumber', sql.NVarChar, passportNumber)
-            .input('occupationKey', sql.NVarChar, occupationKey)
-            .input('nationalityCode', sql.NVarChar, nationalityCode)
-            .query('SELECT * FROM labor_results WHERE passport_number = @passportNumber AND occupation_key = @occupationKey AND nationality_code = @nationalityCode');
+        const result = await db.query(
+            'SELECT * FROM labor_results WHERE passport_number = $1 AND occupation_key = $2 AND nationality_code = $3',
+            [passportNumber, occupationKey, nationalityCode]
+        );
 
-        if (result.recordset.length === 0) {
+        if (result.rows.length === 0) {
             return res.json({ found: false, message: 'Labor result not found' });
         }
 
-        const data = result.recordset[0];
+        const data = result.rows[0];
         res.json({
             found: true,
             data: {
@@ -39,9 +37,8 @@ router.get('/check', async (req, res) => {
 // Get all labor results (admin)
 router.get('/', async (req, res) => {
     try {
-        await poolConnect;
-        const result = await pool.request().query('SELECT * FROM labor_results ORDER BY created_at DESC');
-        res.json(result.recordset);
+        const result = await db.query('SELECT * FROM labor_results ORDER BY created_at DESC');
+        res.json(result.rows);
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
@@ -50,19 +47,14 @@ router.get('/', async (req, res) => {
 // Create labor result
 router.post('/', async (req, res) => {
     try {
-        await poolConnect;
         const { passportNumber, occupationKey, nationalityCode, examDate, score, result } = req.body;
 
-        const insertResult = await pool.request()
-            .input('passport_number', sql.NVarChar, passportNumber)
-            .input('occupation_key', sql.NVarChar, occupationKey)
-            .input('nationality_code', sql.NVarChar, nationalityCode)
-            .input('exam_date', sql.Date, examDate)
-            .input('score', sql.Int, score)
-            .input('result', sql.NVarChar, result || 'Passed')
-            .query('INSERT INTO labor_results (passport_number, occupation_key, nationality_code, exam_date, score, result) OUTPUT INSERTED.id VALUES (@passport_number, @occupation_key, @nationality_code, @exam_date, @score, @result)');
+        const insertResult = await db.query(
+            'INSERT INTO labor_results (passport_number, occupation_key, nationality_code, exam_date, score, result) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
+            [passportNumber, occupationKey, nationalityCode, examDate, score, result || 'Passed']
+        );
 
-        res.status(201).json({ message: 'Labor result created', id: insertResult.recordset[0].id });
+        res.status(201).json({ message: 'Labor result created', id: insertResult.rows[0].id });
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
@@ -71,18 +63,12 @@ router.post('/', async (req, res) => {
 // Update labor result
 router.put('/:id', async (req, res) => {
     try {
-        await poolConnect;
         const { passportNumber, occupationKey, nationalityCode, examDate, score, result } = req.body;
 
-        await pool.request()
-            .input('id', sql.Int, req.params.id)
-            .input('passport_number', sql.NVarChar, passportNumber)
-            .input('occupation_key', sql.NVarChar, occupationKey)
-            .input('nationality_code', sql.NVarChar, nationalityCode)
-            .input('exam_date', sql.Date, examDate)
-            .input('score', sql.Int, score)
-            .input('result', sql.NVarChar, result)
-            .query('UPDATE labor_results SET passport_number = @passport_number, occupation_key = @occupation_key, nationality_code = @nationality_code, exam_date = @exam_date, score = @score, result = @result, updated_at = GETDATE() WHERE id = @id');
+        await db.query(
+            'UPDATE labor_results SET passport_number = $1, occupation_key = $2, nationality_code = $3, exam_date = $4, score = $5, result = $6, updated_at = NOW() WHERE id = $7',
+            [passportNumber, occupationKey, nationalityCode, examDate, score, result, req.params.id]
+        );
 
         res.json({ message: 'Labor result updated' });
     } catch (error) {
@@ -93,10 +79,7 @@ router.put('/:id', async (req, res) => {
 // Delete labor result
 router.delete('/:id', async (req, res) => {
     try {
-        await poolConnect;
-        await pool.request()
-            .input('id', sql.Int, req.params.id)
-            .query('DELETE FROM labor_results WHERE id = @id');
+        await db.query('DELETE FROM labor_results WHERE id = $1', [req.params.id]);
         res.json({ message: 'Labor result deleted' });
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });

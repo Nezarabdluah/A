@@ -1,25 +1,22 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { pool, poolConnect, sql } = require('../database/db');
+const db = require('../database/db');
 
 const router = express.Router();
 
 // Login
 router.post('/login', async (req, res) => {
     try {
-        await poolConnect;
         const { email, password } = req.body;
 
-        const result = await pool.request()
-            .input('email', sql.NVarChar, email)
-            .query('SELECT * FROM users WHERE email = @email');
+        const result = await db.query('SELECT * FROM users WHERE email = $1', [email]);
 
-        if (result.recordset.length === 0) {
+        if (result.rows.length === 0) {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
 
-        const user = result.recordset[0];
+        const user = result.rows[0];
         const isMatch = await bcrypt.compare(password, user.password_hash);
 
         if (!isMatch) {
@@ -50,15 +47,12 @@ router.post('/login', async (req, res) => {
 // Register
 router.post('/register', async (req, res) => {
     try {
-        await poolConnect;
         const { email, password, firstName, lastName } = req.body;
 
         // Check if user exists
-        const existing = await pool.request()
-            .input('email', sql.NVarChar, email)
-            .query('SELECT id FROM users WHERE email = @email');
+        const existing = await db.query('SELECT id FROM users WHERE email = $1', [email]);
 
-        if (existing.recordset.length > 0) {
+        if (existing.rows.length > 0) {
             return res.status(400).json({ message: 'User already exists' });
         }
 
@@ -67,14 +61,12 @@ router.post('/register', async (req, res) => {
         const passwordHash = await bcrypt.hash(password, salt);
 
         // Insert user
-        const result = await pool.request()
-            .input('email', sql.NVarChar, email)
-            .input('password_hash', sql.NVarChar, passwordHash)
-            .input('first_name', sql.NVarChar, firstName)
-            .input('last_name', sql.NVarChar, lastName)
-            .query('INSERT INTO users (email, password_hash, first_name, last_name) OUTPUT INSERTED.id VALUES (@email, @password_hash, @first_name, @last_name)');
+        const result = await db.query(
+            'INSERT INTO users (email, password_hash, first_name, last_name) VALUES ($1, $2, $3, $4) RETURNING id',
+            [email, passwordHash, firstName, lastName]
+        );
 
-        res.status(201).json({ message: 'User registered successfully', userId: result.recordset[0].id });
+        res.status(201).json({ message: 'User registered successfully', userId: result.rows[0].id });
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
@@ -100,16 +92,16 @@ const verifyToken = (req, res, next) => {
 // Get current user
 router.get('/me', verifyToken, async (req, res) => {
     try {
-        await poolConnect;
-        const result = await pool.request()
-            .input('id', sql.Int, req.user.id)
-            .query('SELECT id, email, first_name, last_name, role FROM users WHERE id = @id');
+        const result = await db.query(
+            'SELECT id, email, first_name, last_name, role FROM users WHERE id = $1',
+            [req.user.id]
+        );
 
-        if (result.recordset.length === 0) {
+        if (result.rows.length === 0) {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        res.json(result.recordset[0]);
+        res.json(result.rows[0]);
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
     }

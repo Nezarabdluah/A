@@ -1,18 +1,16 @@
 const express = require('express');
-const { pool, poolConnect, sql } = require('../database/db');
+const db = require('../database/db');
 const bcrypt = require('bcryptjs');
 const { sendOTPEmail, sendApprovalEmail } = require('../services/emailService');
 
 // Mock OTP storage (In production, use Redis or DB with expiry)
 // We will use the database table 'otp_codes' in this implementation
 
-
 const router = express.Router();
 
 // Create new applicant (sign up step 1)
 router.post('/', async (req, res) => {
     try {
-        await poolConnect;
         const {
             passportNumber,
             firstName,
@@ -28,27 +26,12 @@ router.post('/', async (req, res) => {
         } = req.body;
 
         // Check if applicant exists
-        const existing = await pool.request()
-            .input('passportNumber', sql.NVarChar, passportNumber)
-            .query('SELECT id FROM applicants WHERE passport_number = @passportNumber');
+        const existing = await db.query('SELECT id FROM applicants WHERE passport_number = $1', [passportNumber]);
 
-        if (existing.recordset.length > 0) {
+        if (existing.rows.length > 0) {
             return res.status(400).json({ message: 'Applicant already exists with this passport' });
         }
 
-        // Insert applicant
-        const result = await pool.request()
-            .input('passport_number', sql.NVarChar, passportNumber)
-            .input('first_name', sql.NVarChar, noFirstName ? null : firstName)
-            .input('last_name', sql.NVarChar, noLastName ? null : lastName)
-            .input('no_first_name', sql.Bit, noFirstName || false)
-            .input('no_last_name', sql.Bit, noLastName || false)
-            .input('nationality', sql.NVarChar, nationality)
-            .input('email', sql.NVarChar, email)
-            .input('phone', sql.NVarChar, phone)
-            .input('country_code', sql.NVarChar, countryCode)
-            .input('passport_image', sql.NVarChar, passportImagePath)
-            .input('status', sql.NVarChar, 'Pending')
         // Hash password
         const salt = await bcrypt.genSalt(10);
         const passwordHash = await bcrypt.hash(password, salt);
@@ -66,37 +49,35 @@ router.post('/', async (req, res) => {
         }
 
         // Store OTP
-        await pool.request()
-            .input('email', sql.NVarChar, email)
-            .input('code', sql.NVarChar, otpCode)
-            .input('expiry', sql.DateTime, otpExpiry)
-            .query('INSERT INTO otp_codes (email, code, expiry) VALUES (@email, @code, @expiry)');
+        await db.query(
+            'INSERT INTO otp_codes (email, code, expiry) VALUES ($1, $2, $3)',
+            [email, otpCode, otpExpiry]
+        );
 
         // Insert applicant
-        const insertResult = await pool.request()
-            .input('passport_number', sql.NVarChar, passportNumber)
-            .input('first_name', sql.NVarChar, noFirstName ? null : firstName)
-            .input('last_name', sql.NVarChar, noLastName ? null : lastName)
-            .input('no_first_name', sql.Bit, noFirstName || false)
-            .input('no_last_name', sql.Bit, noLastName || false)
-            .input('nationality', sql.NVarChar, nationality)
-            .input('email', sql.NVarChar, email)
-            .input('phone', sql.NVarChar, phone)
-            .input('country_code', sql.NVarChar, countryCode)
-            .input('passport_image', sql.NVarChar, passportImagePath)
-            .input('password_hash', sql.NVarChar, passwordHash)
-            .input('status', sql.NVarChar, 'Pending')
-            .query(`
-                INSERT INTO applicants 
-                (passport_number, first_name, last_name, no_first_name, no_last_name, nationality, email, phone, country_code, passport_image, password_hash, status) 
-                OUTPUT INSERTED.id 
-                VALUES (@passport_number, @first_name, @last_name, @no_first_name, @no_last_name, @nationality, @email, @phone, @country_code, @passport_image, @password_hash, @status)
-            `);
-
+        const insertResult = await db.query(`
+            INSERT INTO applicants 
+            (passport_number, first_name, last_name, no_first_name, no_last_name, nationality, email, phone, country_code, passport_image, password_hash, status) 
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+            RETURNING id
+        `, [
+            passportNumber,
+            noFirstName ? null : firstName,
+            noLastName ? null : lastName,
+            noFirstName || false,
+            noLastName || false,
+            nationality,
+            email,
+            phone,
+            countryCode,
+            passportImagePath,
+            passwordHash,
+            'Pending'
+        ]);
 
         res.status(201).json({
             message: 'Application submitted successfully',
-            applicantId: insertResult.recordset[0].id
+            applicantId: insertResult.rows[0].id
         });
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
@@ -106,31 +87,26 @@ router.post('/', async (req, res) => {
 // Verify OTP
 router.post('/verify-otp', async (req, res) => {
     try {
-        await poolConnect;
         const { email, code } = req.body;
 
-        const result = await pool.request()
-            .input('email', sql.NVarChar, email)
-            .input('code', sql.NVarChar, code)
-            .query(`
-                SELECT TOP 1 * FROM otp_codes 
-                WHERE email = @email AND code = @code 
-                AND expiry > SYSUTCDATETIME()
-                ORDER BY created_at DESC
-            `);
+        const result = await db.query(`
+            SELECT * FROM otp_codes 
+            WHERE email = $1 AND code = $2 
+            AND expiry > NOW()
+            ORDER BY created_at DESC
+            LIMIT 1
+        `, [email, code]);
 
-        if (result.recordset.length === 0) {
+        if (result.rows.length === 0) {
             return res.status(400).json({ message: 'Invalid or expired OTP' });
         }
 
         // Mark as verified updates
-        await pool.request()
-            .input('email', sql.NVarChar, email)
-            .query(`
-                UPDATE applicants 
-                SET is_verified = 1 
-                WHERE email = @email
-            `);
+        await db.query(`
+            UPDATE applicants 
+            SET is_verified = 1 
+            WHERE email = $1
+        `, [email]);
 
         res.json({ message: 'Email verified successfully' });
     } catch (error) {
@@ -141,7 +117,6 @@ router.post('/verify-otp', async (req, res) => {
 // Resend OTP
 router.post('/resend-otp', async (req, res) => {
     try {
-        await poolConnect;
         const { email } = req.body;
 
         // Generate OTP
@@ -149,11 +124,10 @@ router.post('/resend-otp', async (req, res) => {
         const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
         // Store OTP
-        await pool.request()
-            .input('email', sql.NVarChar, email)
-            .input('code', sql.NVarChar, otpCode)
-            .input('expiry', sql.DateTime, otpExpiry)
-            .query('INSERT INTO otp_codes (email, code, expiry) VALUES (@email, @code, @expiry)');
+        await db.query(
+            'INSERT INTO otp_codes (email, code, expiry) VALUES ($1, $2, $3)',
+            [email, otpCode, otpExpiry]
+        );
 
         // Send OTP Email
         try {
@@ -171,10 +145,8 @@ router.post('/resend-otp', async (req, res) => {
 // Get all applicants (admin)
 router.get('/', async (req, res) => {
     try {
-        await poolConnect;
-        const result = await pool.request()
-            .query('SELECT * FROM applicants ORDER BY created_at DESC');
-        res.json(result.recordset);
+        const result = await db.query('SELECT * FROM applicants ORDER BY created_at DESC');
+        res.json(result.rows);
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
@@ -183,16 +155,13 @@ router.get('/', async (req, res) => {
 // Get single applicant
 router.get('/:id', async (req, res) => {
     try {
-        await poolConnect;
-        const result = await pool.request()
-            .input('id', sql.Int, req.params.id)
-            .query('SELECT * FROM applicants WHERE id = @id');
+        const result = await db.query('SELECT * FROM applicants WHERE id = $1', [req.params.id]);
 
-        if (result.recordset.length === 0) {
+        if (result.rows.length === 0) {
             return res.status(404).json({ message: 'Applicant not found' });
         }
 
-        res.json(result.recordset[0]);
+        res.json(result.rows[0]);
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
@@ -201,13 +170,12 @@ router.get('/:id', async (req, res) => {
 // Update applicant status
 router.put('/:id/status', async (req, res) => {
     try {
-        await poolConnect;
         const { status } = req.body;
 
-        await pool.request()
-            .input('id', sql.Int, req.params.id)
-            .input('status', sql.NVarChar, status)
-            .query('UPDATE applicants SET status = @status, updated_at = GETDATE() WHERE id = @id');
+        await db.query(
+            'UPDATE applicants SET status = $1, updated_at = NOW() WHERE id = $2',
+            [status, req.params.id]
+        );
 
         res.json({ message: 'Status updated' });
     } catch (error) {
@@ -218,14 +186,12 @@ router.put('/:id/status', async (req, res) => {
 // Update applicant verification step
 router.put('/:id/verification', async (req, res) => {
     try {
-        await poolConnect;
         const { verificationCode, verificationStatus } = req.body;
 
-        await pool.request()
-            .input('id', sql.Int, req.params.id)
-            .input('verification_code', sql.NVarChar, verificationCode)
-            .input('verification_status', sql.NVarChar, verificationStatus)
-            .query('UPDATE applicants SET verification_code = @verification_code, verification_status = @verification_status, updated_at = GETDATE() WHERE id = @id');
+        await db.query(
+            'UPDATE applicants SET verification_code = $1, verification_status = $2, updated_at = NOW() WHERE id = $3',
+            [verificationCode, verificationStatus, req.params.id]
+        );
 
         res.json({ message: 'Verification updated' });
     } catch (error) {
@@ -236,10 +202,7 @@ router.put('/:id/verification', async (req, res) => {
 // Delete applicant
 router.delete('/:id', async (req, res) => {
     try {
-        await poolConnect;
-        await pool.request()
-            .input('id', sql.Int, req.params.id)
-            .query('DELETE FROM applicants WHERE id = @id');
+        await db.query('DELETE FROM applicants WHERE id = $1', [req.params.id]);
         res.json({ message: 'Applicant deleted' });
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });

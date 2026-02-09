@@ -1,22 +1,19 @@
 require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') });
-const sql = require('mssql/msnodesqlv8');
+const { Pool } = require('pg');
 const bcrypt = require('bcryptjs');
 
-const config = {
-    server: '(localdb)\\MSSQLLocalDB',
-    database: process.env.DB_NAME || 'svp_database',
-    driver: 'msnodesqlv8',
-    options: {
-        trustedConnection: true
-    }
-};
+const isProduction = process.env.NODE_ENV === 'production';
+
+const connectionString = process.env.DATABASE_URL || `postgresql://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`;
+
+const pool = new Pool({
+    connectionString: isProduction ? process.env.DATABASE_URL : connectionString,
+    ssl: isProduction ? { rejectUnauthorized: false } : false
+});
 
 const resetAdminPassword = async () => {
-    let pool;
-
     try {
         console.log('🔄 Connecting to database...');
-        pool = await sql.connect(config);
 
         // Generate proper bcrypt hash for "admin123"
         const password = 'admin123';
@@ -26,19 +23,17 @@ const resetAdminPassword = async () => {
         console.log('🔄 Updating admin password...');
         console.log('New hash:', hashedPassword);
 
-        // Delete existing admin user and recreate
-        await pool.request().query(`DELETE FROM users WHERE email = 'admin@svp.com'`);
+        // Check if admin exists
+        const check = await pool.query("SELECT id FROM users WHERE email = 'admin@svp.com'");
 
-        await pool.request()
-            .input('email', sql.NVarChar, 'admin@svp.com')
-            .input('password_hash', sql.NVarChar, hashedPassword)
-            .input('first_name', sql.NVarChar, 'Admin')
-            .input('last_name', sql.NVarChar, 'User')
-            .input('role', sql.NVarChar, 'admin')
-            .query(`
+        if (check.rows.length > 0) {
+            await pool.query("UPDATE users SET password_hash = $1 WHERE email = 'admin@svp.com'", [hashedPassword]);
+        } else {
+            await pool.query(`
                 INSERT INTO users (email, password_hash, first_name, last_name, role)
-                VALUES (@email, @password_hash, @first_name, @last_name, @role)
-            `);
+                VALUES ('admin@svp.com', $1, 'Admin', 'User', 'admin')
+            `, [hashedPassword]);
+        }
 
         console.log('✅ Admin password reset successfully!');
         console.log('Email: admin@svp.com');
@@ -47,7 +42,7 @@ const resetAdminPassword = async () => {
     } catch (error) {
         console.error('❌ Error:', error);
     } finally {
-        if (pool) await pool.close();
+        await pool.end();
     }
 };
 
