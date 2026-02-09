@@ -35,6 +35,41 @@ app.get('/api/health', (req, res) => {
     res.json({ status: 'OK', message: 'SVP Backend API is running' });
 });
 
+// Setup endpoint (temporary)
+const { Pool } = require('pg');
+app.get('/api/setup', async (req, res) => {
+    const isProduction = process.env.NODE_ENV === 'production';
+    const connectionString = process.env.DATABASE_URL;
+    const pool = new Pool({
+        connectionString: isProduction ? process.env.DATABASE_URL : connectionString,
+        ssl: isProduction ? { rejectUnauthorized: false } : false
+    });
+
+    try {
+        // Sample admin user (password: admin123)
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS users (
+                id SERIAL PRIMARY KEY,
+                email VARCHAR(255) UNIQUE NOT NULL,
+                password_hash VARCHAR(255) NOT NULL,
+                first_name VARCHAR(100),
+                last_name VARCHAR(100),
+                role VARCHAR(20) DEFAULT 'user',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+            INSERT INTO users (email, password_hash, first_name, last_name, role)
+            VALUES ('admin@svp.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Admin', 'User', 'admin')
+            ON CONFLICT (email) DO NOTHING;
+        `);
+        res.json({ status: 'OK', message: 'Database seeded with admin user.' });
+    } catch (error) {
+        res.status(500).json({ status: 'Error', error: error.message });
+    } finally {
+        await pool.end();
+    }
+});
+
 // API documentation
 app.get('/api', (req, res) => {
     res.json({
