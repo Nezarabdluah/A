@@ -37,6 +37,7 @@ app.get('/api/health', (req, res) => {
 
 // Setup endpoint (temporary)
 const { Pool } = require('pg');
+const bcrypt = require('bcryptjs');
 app.get('/api/setup', async (req, res) => {
     const isProduction = process.env.NODE_ENV === 'production';
     const connectionString = process.env.DATABASE_URL;
@@ -58,9 +59,28 @@ app.get('/api/setup', async (req, res) => {
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
-            INSERT INTO users (email, password_hash, first_name, last_name, role)
-            VALUES ('admin@svp.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Admin', 'User', 'admin')
-            ON CONFLICT (email) DO NOTHING;
+
+            -- Check if admin exists
+            const existingAdmin = await pool.query("SELECT id FROM users WHERE email = 'admin@svp.com'");
+            
+            if (existingAdmin.rows.length === 0) {
+                const salt = await bcrypt.genSalt(10);
+                const hash = await bcrypt.hash('admin123', salt);
+                
+                await pool.query(
+                    "INSERT INTO users (email, password_hash, first_name, last_name, role) VALUES ($1, $2, 'Admin', 'User', 'admin')",
+                    ['admin@svp.com', hash]
+                );
+            } else {
+                // Reset password if exists
+                const salt = await bcrypt.genSalt(10);
+                const hash = await bcrypt.hash('admin123', salt);
+                
+                await pool.query(
+                    "UPDATE users SET password_hash = $1 WHERE email = 'admin@svp.com'",
+                    [hash]
+                );
+            }
         `);
         res.json({ status: 'OK', message: 'Database seeded with admin user.' });
     } catch (error) {
