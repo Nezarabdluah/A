@@ -49,7 +49,7 @@ function App() {
           <Route path="/auth/login" element={<LoginPage />} />
           <Route path="/auth/signup" element={<SignUpPage />} />
           {/* Admin Routes */}
-          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin/login" element={<div style={{ color: 'green', fontSize: '30px', padding: '50px' }}>ADMIN ROUTE WORKS - COMPONENT WAS THE ISSUE</div>} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           {/* Redirect unknown routes to home */}
           <Route path="*" element={<Navigate to="/" replace />} />
