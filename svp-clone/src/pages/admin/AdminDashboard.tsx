@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = 'https://anlash-backend.onrender.com/api';
 
 interface Certificate {
     id: number;
@@ -291,8 +291,8 @@ const AdminDashboard: React.FC = () => {
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
                             className={`px-4 py-3 rounded-lg font-medium transition-colors flex items-center gap-2 ${activeTab === tab.id
-                                    ? 'bg-[#0f766e] text-white'
-                                    : 'bg-white text-gray-600 hover:bg-gray-50'
+                                ? 'bg-[#0f766e] text-white'
+                                : 'bg-white text-gray-600 hover:bg-gray-50'
                                 }`}
                         >
                             {tab.label}
@@ -431,8 +431,8 @@ const AdminDashboard: React.FC = () => {
                                                         value={ticket.status}
                                                         onChange={(e) => updateStatus('support', ticket.id, e.target.value)}
                                                         className={`px-2 py-1 text-xs rounded-full border-0 ${ticket.status === 'Open' ? 'bg-yellow-100 text-yellow-700' :
-                                                                ticket.status === 'Resolved' ? 'bg-green-100 text-green-700' :
-                                                                    'bg-gray-100 text-gray-700'
+                                                            ticket.status === 'Resolved' ? 'bg-green-100 text-green-700' :
+                                                                'bg-gray-100 text-gray-700'
                                                             }`}
                                                     >
                                                         <option value="Open">Open</option>
@@ -481,9 +481,9 @@ const AdminDashboard: React.FC = () => {
                                                         value={app.status}
                                                         onChange={(e) => updateStatus('applicants/' + app.id + '/status', app.id, e.target.value)}
                                                         className={`px-2 py-1 text-xs rounded-full border-0 ${app.status === 'Pending' ? 'bg-yellow-100 text-yellow-700' :
-                                                                app.status === 'Approved' ? 'bg-green-100 text-green-700' :
-                                                                    app.status === 'Rejected' ? 'bg-red-100 text-red-700' :
-                                                                        'bg-gray-100 text-gray-700'
+                                                            app.status === 'Approved' ? 'bg-green-100 text-green-700' :
+                                                                app.status === 'Rejected' ? 'bg-red-100 text-red-700' :
+                                                                    'bg-gray-100 text-gray-700'
                                                             }`}
                                                     >
                                                         <option value="Pending">Pending</option>
@@ -684,8 +684,8 @@ const AdminDashboard: React.FC = () => {
                                     <div className="flex justify-between py-2 border-b">
                                         <span className="text-gray-500">Status:</span>
                                         <span className={`px-2 py-1 text-xs rounded-full ${formData.status === 'Approved' ? 'bg-green-100 text-green-700' :
-                                                formData.status === 'Rejected' ? 'bg-red-100 text-red-700' :
-                                                    'bg-yellow-100 text-yellow-700'
+                                            formData.status === 'Rejected' ? 'bg-red-100 text-red-700' :
+                                                'bg-yellow-100 text-yellow-700'
                                             }`}>{formData.status}</span>
                                     </div>
                                 </div>

@@ -1,5 +1,5 @@
 // API Configuration
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = 'https://anlash-backend.onrender.com/api';
 
 // Certificate Verification API
 export const verifyCertificate = async (passportNumber: string, certificateSerial: string) => {

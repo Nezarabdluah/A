@@ -77,7 +77,7 @@ const SupportModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => voi
         setError('');
 
         try {
-            const response = await fetch('http://localhost:5000/api/support', {
+            const response = await fetch('https://anlash-backend.onrender.com/api/support', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -259,7 +259,7 @@ const CertificateVerificationModal = ({ isOpen, onClose }: { isOpen: boolean; on
 
         try {
             const response = await fetch(
-                `http://localhost:5000/api/certificates/verify?passportNumber=${encodeURIComponent(passportNumber)}&certificateSerial=${encodeURIComponent(serialNumber)}`
+                `https://anlash-backend.onrender.com/api/certificates/verify?passportNumber=${encodeURIComponent(passportNumber)}&certificateSerial=${encodeURIComponent(serialNumber)}`
             );
             const data = await response.json();
             setResult(data);
@@ -497,7 +497,7 @@ const CheckLaborResultModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: 
 
         try {
             const response = await fetch(
-                `http://localhost:5000/api/labor-results/check?passportNumber=${encodeURIComponent(passportNumber)}&occupationKey=${encodeURIComponent(occupationKey)}&nationalityCode=${encodeURIComponent(nationalityCode)}`
+                `https://anlash-backend.onrender.com/api/labor-results/check?passportNumber=${encodeURIComponent(passportNumber)}&occupationKey=${encodeURIComponent(occupationKey)}&nationalityCode=${encodeURIComponent(nationalityCode)}`
             );
             const data = await response.json();
             setResult(data);

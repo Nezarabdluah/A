@@ -6,7 +6,7 @@ import PassportInstructionsModal from '../../components/PassportInstructionsModa
 import PersonalPhotoInstructionsModal from '../../components/PersonalPhotoInstructionsModal';
 import { register, verifyOTP, resendOTP } from '../../services/api';
 
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = 'https://anlash-backend.onrender.com/api';
 
 const SignUpPage = () => {
     const navigate = useNavigate();
