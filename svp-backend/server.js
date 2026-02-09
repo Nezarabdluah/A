@@ -120,6 +120,7 @@ app.get('/api/debug-auth', async (req, res) => {
             await pool.query("UPDATE users SET password_hash = $1 WHERE email = $2", [newHash, email]);
 
             return res.json({
+                version: 'v2-autofix',
                 result: 'HASH_MISMATCH_FIXED',
                 message: 'Password was incorrect in DB. Has been automatically reset to: admin123',
                 email: user.email,
@@ -129,6 +130,7 @@ app.get('/api/debug-auth', async (req, res) => {
         }
 
         res.json({
+            version: 'v2-autofix',
             result: 'MATCH_SUCCESS',
             email: user.email,
             storedHashPrefix: user.password_hash.substring(0, 10) + '...',
