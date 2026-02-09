@@ -38,21 +38,14 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
 
 
 
+
 function App() {
   return (
     <ErrorBoundary>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<VerificationPage />} />
-          <Route path="/auth/login" element={<LoginPage />} />
-          <Route path="/auth/signup" element={<SignUpPage />} />
-          {/* Admin Routes */}
-          <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          {/* Redirect unknown routes to home */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </BrowserRouter>
+      <div style={{ padding: 20, background: 'red', color: 'white' }}>
+        DEBUG: Router Removed - Testing Direct Mount
+      </div>
+      <AdminLogin />
     </ErrorBoundary>
   );
 }
