@@ -90,6 +90,41 @@ app.get('/api/setup', async (req, res) => {
     }
 });
 
+// Debug Auth Endpoint (Temporary)
+app.get('/api/debug-auth', async (req, res) => {
+    const isProduction = process.env.NODE_ENV === 'production';
+    const connectionString = process.env.DATABASE_URL;
+    const pool = new Pool({
+        connectionString: isProduction ? process.env.DATABASE_URL : connectionString,
+        ssl: isProduction ? { rejectUnauthorized: false } : false
+    });
+
+    try {
+        const email = 'admin@svp.com';
+        const password = 'admin123';
+
+        const result = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+
+        if (result.rows.length === 0) {
+            return res.json({ result: 'USER_NOT_FOUND', email });
+        }
+
+        const user = result.rows[0];
+        const isMatch = await bcrypt.compare(password, user.password_hash);
+
+        res.json({
+            result: isMatch ? 'MATCH_SUCCESS' : 'HASH_MISMATCH',
+            email: user.email,
+            storedHashPrefix: user.password_hash.substring(0, 10) + '...',
+            role: user.role
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    } finally {
+        await pool.end();
+    }
+});
+
 // API documentation
 app.get('/api', (req, res) => {
     res.json({
