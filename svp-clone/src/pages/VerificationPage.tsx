@@ -291,6 +291,10 @@ const CertificateVerificationModal = ({ isOpen, onClose }: { isOpen: boolean; on
             const data = await response.json();
             setResult(data);
             setStep('result');
+
+            // Update URL with verification params so user can copy/share
+            const newUrl = `${window.location.origin}/?passportNumber=${encodeURIComponent(passportNumber)}&certificateSerial=${encodeURIComponent(serialNumber)}`;
+            window.history.replaceState({}, '', newUrl);
         } catch (err) {
             setError('Connection failed. Make sure the backend is running.');
         } finally {
