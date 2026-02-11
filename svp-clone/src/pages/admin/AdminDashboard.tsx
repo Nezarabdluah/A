@@ -365,7 +365,7 @@ const AdminDashboard: React.FC = () => {
                                                     <button onClick={() => handleDelete('certificates', cert.id)} className="text-red-500 hover:text-red-700 text-sm">Delete</button>
                                                     <button
                                                         onClick={() => {
-                                                            const link = `${window.location.origin}/#/?passportNumber=${encodeURIComponent(cert.passport_number)}&certificateSerial=${encodeURIComponent(cert.certificate_serial)}`;
+                                                            const link = `${window.location.origin}/?passportNumber=${encodeURIComponent(cert.passport_number)}&certificateSerial=${encodeURIComponent(cert.certificate_serial)}`;
                                                             navigator.clipboard.writeText(link).then(() => {
                                                                 const btn = document.getElementById(`copy-btn-${cert.id}`);
                                                                 if (btn) { btn.textContent = 'Copied!'; setTimeout(() => { btn.textContent = 'Copy Link'; }, 2000); }

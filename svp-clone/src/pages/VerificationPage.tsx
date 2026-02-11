@@ -240,13 +240,22 @@ const CertificateVerificationModal = ({ isOpen, onClose }: { isOpen: boolean; on
     } | null>(null);
 
     // Read URL params for shareable verification links
+    // Supports both: /?passportNumber=X&certificateSerial=Y AND /#/?passportNumber=X&certificateSerial=Y
     const location = useLocation();
     const autoVerifyDone = useState(false);
 
     useEffect(() => {
-        const searchParams = new URLSearchParams(location.search);
-        const urlPassport = searchParams.get('passportNumber');
-        const urlSerial = searchParams.get('certificateSerial');
+        // Check main URL params first (before #), then hash params
+        let searchParams = new URLSearchParams(window.location.search);
+        let urlPassport = searchParams.get('passportNumber');
+        let urlSerial = searchParams.get('certificateSerial');
+
+        // If not found in main URL, check hash URL params
+        if (!urlPassport || !urlSerial) {
+            searchParams = new URLSearchParams(location.search);
+            urlPassport = searchParams.get('passportNumber');
+            urlSerial = searchParams.get('certificateSerial');
+        }
 
         if (urlPassport && urlSerial && !autoVerifyDone[0]) {
             setPassportNumber(urlPassport);
