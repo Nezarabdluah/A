@@ -8,6 +8,7 @@ interface Certificate {
     certificate_serial: string;
     passport_number: string;
     holder_name: string;
+    occupation: string;
     issue_date: string;
     expiry_date: string;
     status: string;
@@ -160,7 +161,7 @@ const AdminDashboard: React.FC = () => {
     const getEmptyForm = () => {
         switch (activeTab) {
             case 'certificates':
-                return { certificate_serial: '', passport_number: '', holder_name: '', issue_date: '', expiry_date: '', status: 'Valid' };
+                return { certificate_serial: '', passport_number: '', holder_name: '', occupation: '', issue_date: '', expiry_date: '', status: 'Valid' };
             case 'labor':
                 return { passport_number: '', occupation_key: '', nationality_code: '', exam_date: '', score: '', result: 'Passed' };
             case 'support':
@@ -184,6 +185,7 @@ const AdminDashboard: React.FC = () => {
                         certificateSerial: formData.certificate_serial,
                         passportNumber: formData.passport_number,
                         holderName: formData.holder_name,
+                        occupation: formData.occupation,
                         issueDate: formData.issue_date,
                         expiryDate: formData.expiry_date,
                         status: formData.status
@@ -339,6 +341,7 @@ const AdminDashboard: React.FC = () => {
                                             <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Serial</th>
                                             <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Passport</th>
                                             <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Holder</th>
+                                            <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Occupation</th>
                                             <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Expiry</th>
                                             <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                                             <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
@@ -350,6 +353,7 @@ const AdminDashboard: React.FC = () => {
                                                 <td className="px-6 py-4 text-sm font-medium text-gray-900">{cert.certificate_serial}</td>
                                                 <td className="px-6 py-4 text-sm text-gray-600">{cert.passport_number}</td>
                                                 <td className="px-6 py-4 text-sm text-gray-600">{cert.holder_name}</td>
+                                                <td className="px-6 py-4 text-sm text-gray-600">{cert.occupation}</td>
                                                 <td className="px-6 py-4 text-sm text-gray-600">{new Date(cert.expiry_date).toLocaleDateString()}</td>
                                                 <td className="px-6 py-4">
                                                     <span className={`px-2 py-1 text-xs rounded-full ${cert.status === 'Valid' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
@@ -363,7 +367,7 @@ const AdminDashboard: React.FC = () => {
                                             </tr>
                                         ))}
                                         {certificates.length === 0 && (
-                                            <tr><td colSpan={6} className="px-6 py-8 text-center text-gray-500">No certificates found</td></tr>
+                                            <tr><td colSpan={7} className="px-6 py-8 text-center text-gray-500">No certificates found</td></tr>
                                         )}
                                     </tbody>
                                 </table>
@@ -570,6 +574,10 @@ const AdminDashboard: React.FC = () => {
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Holder Name</label>
                                         <input type="text" value={formData.holder_name || ''} onChange={(e) => setFormData({ ...formData, holder_name: e.target.value })} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#0f766e] outline-none" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Occupation</label>
+                                        <input type="text" value={formData.occupation || ''} onChange={(e) => setFormData({ ...formData, occupation: e.target.value })} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#0f766e] outline-none" />
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>

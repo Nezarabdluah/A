@@ -231,6 +231,7 @@ const CertificateVerificationModal = ({ isOpen, onClose }: { isOpen: boolean; on
         status?: string;
         data?: {
             holderName: string;
+            occupation: string;
             certificateSerial: string;
             passportNumber: string;
             issueDate: string;
@@ -408,13 +409,11 @@ const CertificateVerificationModal = ({ isOpen, onClose }: { isOpen: boolean; on
                                                 </div>
                                             </div>
                                             <div>
-                                                <div className="text-xs text-[#8394a8] mb-1">Issue Date:</div>
-                                                <div className="text-sm font-medium text-[#1e293b]">
-                                                    {result.data?.issueDate ? new Date(result.data.issueDate).toLocaleDateString() : 'N/A'}
-                                                </div>
+                                                <div className="text-xs text-[#8394a8] mb-1">Occupation:</div>
+                                                <div className="text-sm font-medium text-[#1e293b]">{result.data?.occupation || 'N/A'}</div>
                                             </div>
                                             <div>
-                                                <div className="text-xs text-[#8394a8] mb-1">Holder Name:</div>
+                                                <div className="text-xs text-[#8394a8] mb-1">Labor Name:</div>
                                                 <div className="text-sm font-medium text-[#1e293b]">{result.data?.holderName}</div>
                                             </div>
                                         </div>
@@ -709,8 +708,9 @@ const VerificationPage: React.FC = () => {
     const [currentSlide, setCurrentSlide] = useState(0);
     const { scrollY } = useScroll();
     const [isSupportOpen, setIsSupportOpen] = useState(false);
-    const [isCertificateModalOpen, setIsCertificateModalOpen] = useState(false);
+    const [isCertificateModalOpen, setIsCertificateModalOpen] = useState(true);
     const [isLaborModalOpen, setIsLaborModalOpen] = useState(false);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     useMotionValueEvent(scrollY, "change", (latest) => {
         setIsScrolled(latest > 50);
@@ -773,7 +773,7 @@ const VerificationPage: React.FC = () => {
 
     return (
         <div className="overflow-x-hidden font-sans bg-white">
-            {/* Header - Fixed - LARGER */}
+            {/* Header - Fixed */}
             <motion.header
                 initial={{ y: -100 }}
                 animate={{ y: 0 }}
@@ -781,7 +781,7 @@ const VerificationPage: React.FC = () => {
                 className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-white shadow-md py-4' : 'bg-transparent py-6'}`}
             >
                 <div className="container mx-auto px-8 md:px-16 flex items-center justify-between">
-                    {/* Logo - LARGER */}
+                    {/* Logo */}
                     <div className="flex items-center gap-4">
                         <div className="relative w-14 h-14 flex items-center justify-center">
                             <svg width="48" height="42" viewBox="0 0 54 44" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -795,22 +795,22 @@ const VerificationPage: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Navigation - LARGER */}
+                    {/* Desktop Navigation */}
                     <nav className={`hidden md:flex items-center gap-10 text-base font-medium transition-colors ${isScrolled ? 'text-[#334155]' : 'text-white'}`}>
                         <button onClick={() => setIsCertificateModalOpen(true)} className="hover:text-[#0d7377] transition-colors">Check certificate</button>
                         <button onClick={() => setIsLaborModalOpen(true)} className="hover:text-[#0d7377] transition-colors">Labor result</button>
                         <a href="#partnership" className="hover:text-[#0d7377] transition-colors">Partnership</a>
                     </nav>
 
-                    {/* Right side - Auth Buttons + Language */}
+                    {/* Right side - Auth Buttons + Language + Hamburger */}
                     <div className="flex items-center gap-3">
-                        {/* Sign in & Sign Up - Only visible when scrolled */}
+                        {/* Sign in & Sign Up - Desktop only, visible when scrolled */}
                         {isScrolled && (
                             <motion.div
                                 initial={{ opacity: 0, x: 20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ duration: 0.3 }}
-                                className="flex items-center gap-2"
+                                className="hidden md:flex items-center gap-2"
                             >
                                 <Link to="/auth/login" className="text-[#334155] hover:text-[#0d7377] px-4 py-2 rounded-lg font-medium text-sm transition-colors">
                                     Sign in
@@ -821,16 +821,85 @@ const VerificationPage: React.FC = () => {
                             </motion.div>
                         )}
 
-                        {/* Language Switcher */}
-                        <button className={`flex items-center gap-2 px-3 py-2 rounded transition-colors text-sm ${isScrolled ? 'text-[#0a192f] hover:bg-gray-100' : 'text-white hover:bg-white/10'}`}>
+                        {/* Language Switcher - Desktop */}
+                        <button className={`hidden md:flex items-center gap-2 px-3 py-2 rounded transition-colors text-sm ${isScrolled ? 'text-[#0a192f] hover:bg-gray-100' : 'text-white hover:bg-white/10'}`}>
                             <span className="font-bold" style={{ fontFamily: 'Cairo, sans-serif' }}>عربية</span>
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                                 <circle cx="12" cy="12" r="9" />
                                 <path d="M2 12h20M12 2a15.3 15.3 0 0 0 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 0 4-10z" />
                             </svg>
                         </button>
+
+                        {/* Hamburger Menu Button - Mobile */}
+                        <button
+                            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                            className={`md:hidden flex flex-col gap-[5px] p-2 ${isScrolled ? 'text-[#0a192f]' : 'text-white'}`}
+                            aria-label="Toggle menu"
+                        >
+                            <span className={`block w-6 h-[2px] ${isScrolled ? 'bg-[#0a192f]' : 'bg-white'} transition-all`}></span>
+                            <span className={`block w-6 h-[2px] ${isScrolled ? 'bg-[#0a192f]' : 'bg-white'} transition-all`}></span>
+                            <span className={`block w-6 h-[2px] ${isScrolled ? 'bg-[#0a192f]' : 'bg-white'} transition-all`}></span>
+                        </button>
                     </div>
                 </div>
+
+                {/* Mobile Menu Dropdown */}
+                {isMobileMenuOpen && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.2 }}
+                        className="md:hidden absolute top-full right-0 w-64 bg-white shadow-xl rounded-bl-lg z-50"
+                    >
+                        {/* Close button */}
+                        <div className="flex justify-end p-3">
+                            <button onClick={() => setIsMobileMenuOpen(false)} className="text-gray-400 hover:text-gray-600">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
+                                </svg>
+                            </button>
+                        </div>
+                        <nav className="flex flex-col px-6 pb-6 gap-1">
+                            <button
+                                onClick={() => { setIsCertificateModalOpen(true); setIsMobileMenuOpen(false); }}
+                                className="text-left text-[#334155] hover:text-[#0d7377] py-2.5 text-base font-medium"
+                            >Check certificate</button>
+                            <button
+                                onClick={() => { setIsLaborModalOpen(true); setIsMobileMenuOpen(false); }}
+                                className="text-left text-[#334155] hover:text-[#0d7377] py-2.5 text-base font-medium"
+                            >Labor result</button>
+                            <a href="#partnership" onClick={() => setIsMobileMenuOpen(false)} className="text-[#334155] hover:text-[#0d7377] py-2.5 text-base font-medium">Partnership</a>
+
+                            <div className="border-t border-gray-200 my-3"></div>
+
+                            {/* Sign in & Sign Up */}
+                            <div className="flex gap-3">
+                                <Link
+                                    to="/auth/login"
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className="flex-1 text-center bg-[#0d7377] text-white py-2.5 rounded-lg font-semibold text-sm"
+                                >Sign in</Link>
+                                <Link
+                                    to="/auth/signup"
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className="flex-1 text-center border-2 border-[#0d7377] text-[#0d7377] py-2.5 rounded-lg font-semibold text-sm"
+                                >Sign Up</Link>
+                            </div>
+
+                            <div className="border-t border-gray-200 my-3"></div>
+
+                            {/* Language */}
+                            <button className="flex items-center gap-2 text-[#334155] py-2">
+                                <span className="font-bold" style={{ fontFamily: 'Cairo, sans-serif' }}>العربية</span>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                    <circle cx="12" cy="12" r="9" />
+                                    <path d="M2 12h20M12 2a15.3 15.3 0 0 0 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 0 4-10z" />
+                                </svg>
+                            </button>
+                        </nav>
+                    </motion.div>
+                )}
             </motion.header>
 
 
