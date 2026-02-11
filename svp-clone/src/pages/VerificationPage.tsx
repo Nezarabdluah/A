@@ -381,22 +381,23 @@ const CertificateVerificationModal = ({ isOpen, onClose }: { isOpen: boolean; on
                         <div>
                             {result?.valid ? (
                                 <>
-                                    {/* Valid Status with Shield Icon */}
-                                    <div className="flex items-center gap-2 mb-4">
-                                        <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path fillRule="evenodd" clipRule="evenodd" d="M7.252 0.0658387C7.32753 0.0226935 7.41301 0 7.5 0C7.58699 0 7.67247 0.0226935 7.748 0.0658387L14.748 4.06584C14.8245 4.10955 14.8881 4.17272 14.9324 4.24893C14.9766 4.32515 15 4.41171 15 4.49984V5.21984C15 7.42581 14.2814 9.57174 12.9528 11.3328C11.6243 13.0938 9.75818 14.3741 7.637 14.9798C7.54745 15.0054 7.45255 15.0054 7.363 14.9798C5.24198 14.3738 3.37607 13.0935 2.04757 11.3325C0.719076 9.5715 0.000300345 7.42573 0 5.21984L0 4.49984C2.8427e-05 4.41171 0.0233513 4.32515 0.0676055 4.24893C0.11186 4.17272 0.175473 4.10955 0.252 4.06584L7.252 0.0658387ZM7.072 10.7108L11.39 5.31184L10.61 4.68784L6.928 9.28884L4.32 7.11584L3.68 7.88384L7.072 10.7108Z" fill="#5F9D3C" />
-                                        </svg>
-                                        <span className="text-[#5F9D3C] font-medium">{result.status}</span>
-                                    </div>
+                                    {/* Result Card - matching reference design */}
+                                    <div className="bg-[#f8fafc] rounded-xl p-5 mb-6 shadow-sm">
+                                        {/* Valid Status with Shield Icon */}
+                                        <div className="flex items-center gap-2 mb-4">
+                                            <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path fillRule="evenodd" clipRule="evenodd" d="M7.252 0.0658387C7.32753 0.0226935 7.41301 0 7.5 0C7.58699 0 7.67247 0.0226935 7.748 0.0658387L14.748 4.06584C14.8245 4.10955 14.8881 4.17272 14.9324 4.24893C14.9766 4.32515 15 4.41171 15 4.49984V5.21984C15 7.42581 14.2814 9.57174 12.9528 11.3328C11.6243 13.0938 9.75818 14.3741 7.637 14.9798C7.54745 15.0054 7.45255 15.0054 7.363 14.9798C5.24198 14.3738 3.37607 13.0935 2.04757 11.3325C0.719076 9.5715 0.000300345 7.42573 0 5.21984L0 4.49984C2.8427e-05 4.41171 0.0233513 4.32515 0.0676055 4.24893C0.11186 4.17272 0.175473 4.10955 0.252 4.06584L7.252 0.0658387ZM7.072 10.7108L11.39 5.31184L10.61 4.68784L6.928 9.28884L4.32 7.11584L3.68 7.88384L7.072 10.7108Z" fill="#5F9D3C" />
+                                            </svg>
+                                            <span className="text-[#5F9D3C] font-medium">{result.status}</span>
+                                        </div>
 
-                                    {/* Certificate Serial Number */}
-                                    <div className="mb-5">
-                                        <div className="text-sm text-[#0f766e] mb-1">Certificate Serial Number:</div>
-                                        <div className="text-2xl font-bold text-[#1e293b]">{result.data?.certificateSerial}</div>
-                                    </div>
+                                        {/* Certificate Serial Number */}
+                                        <div className="mb-5">
+                                            <div className="text-sm text-[#0f766e] mb-1">Certificate Serial Number:</div>
+                                            <div className="text-2xl font-bold text-[#1e293b]">{result.data?.certificateSerial}</div>
+                                        </div>
 
-                                    {/* Details Box */}
-                                    <div className="bg-[#f8fafc] rounded-lg p-5 mb-6">
+                                        {/* Details */}
                                         <div className="grid grid-cols-2 gap-4">
                                             <div>
                                                 <div className="text-xs text-[#8394a8] mb-1">Passport Number:</div>
@@ -405,7 +406,7 @@ const CertificateVerificationModal = ({ isOpen, onClose }: { isOpen: boolean; on
                                             <div>
                                                 <div className="text-xs text-[#8394a8] mb-1">Valid Until:</div>
                                                 <div className="text-sm font-medium text-[#1e293b]">
-                                                    {result.data?.expiryDate ? new Date(result.data.expiryDate).toLocaleDateString() : 'N/A'}
+                                                    {result.data?.expiryDate ? (() => { const d = new Date(result.data.expiryDate); return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`; })() : 'N/A'}
                                                 </div>
                                             </div>
                                             <div>
