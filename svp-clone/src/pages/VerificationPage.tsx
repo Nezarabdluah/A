@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, useScroll, useMotionValueEvent } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 // Animation Variants
 const fadeInUp = {
@@ -238,6 +238,39 @@ const CertificateVerificationModal = ({ isOpen, onClose }: { isOpen: boolean; on
             expiryDate: string;
         };
     } | null>(null);
+
+    // Read URL params for shareable verification links
+    const location = useLocation();
+    const autoVerifyDone = useState(false);
+
+    useEffect(() => {
+        const searchParams = new URLSearchParams(location.search);
+        const urlPassport = searchParams.get('passportNumber');
+        const urlSerial = searchParams.get('certificateSerial');
+
+        if (urlPassport && urlSerial && !autoVerifyDone[0]) {
+            setPassportNumber(urlPassport);
+            setSerialNumber(urlSerial);
+            autoVerifyDone[1](true);
+
+            // Auto-verify after setting values
+            setLoading(true);
+            fetch(
+                `https://anlash-backend.onrender.com/api/certificates/verify?passportNumber=${encodeURIComponent(urlPassport)}&certificateSerial=${encodeURIComponent(urlSerial)}`
+            )
+                .then(res => res.json())
+                .then(data => {
+                    setResult(data);
+                    setStep('result');
+                })
+                .catch(() => {
+                    setError('Connection failed.');
+                })
+                .finally(() => {
+                    setLoading(false);
+                });
+        }
+    }, [location.search]);
 
     // Reset to input step when modal closes
     const handleClose = () => {
