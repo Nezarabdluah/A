@@ -23,6 +23,7 @@ router.get('/verify', async (req, res) => {
             status: cert.status,
             data: {
                 holderName: cert.holder_name,
+                occupation: cert.occupation,
                 certificateSerial: cert.certificate_serial,
                 passportNumber: cert.passport_number,
                 issueDate: cert.issue_date,
@@ -62,11 +63,11 @@ router.get('/:id', async (req, res) => {
 // Create certificate
 router.post('/', async (req, res) => {
     try {
-        const { certificateSerial, passportNumber, holderName, issueDate, expiryDate, status } = req.body;
+        const { certificateSerial, passportNumber, holderName, occupation, issueDate, expiryDate, status } = req.body;
 
         const result = await db.query(
-            'INSERT INTO certificates (certificate_serial, passport_number, holder_name, issue_date, expiry_date, status) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
-            [certificateSerial, passportNumber, holderName, issueDate, expiryDate, status || 'Valid']
+            'INSERT INTO certificates (certificate_serial, passport_number, holder_name, occupation, issue_date, expiry_date, status) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id',
+            [certificateSerial, passportNumber, holderName, occupation, issueDate, expiryDate, status || 'Valid']
         );
 
         res.status(201).json({ message: 'Certificate created', id: result.rows[0].id });
@@ -78,11 +79,11 @@ router.post('/', async (req, res) => {
 // Update certificate
 router.put('/:id', async (req, res) => {
     try {
-        const { certificateSerial, passportNumber, holderName, issueDate, expiryDate, status } = req.body;
+        const { certificateSerial, passportNumber, holderName, occupation, issueDate, expiryDate, status } = req.body;
 
         await db.query(
-            'UPDATE certificates SET certificate_serial = $1, passport_number = $2, holder_name = $3, issue_date = $4, expiry_date = $5, status = $6, updated_at = NOW() WHERE id = $7',
-            [certificateSerial, passportNumber, holderName, issueDate, expiryDate, status, req.params.id]
+            'UPDATE certificates SET certificate_serial = $1, passport_number = $2, holder_name = $3, occupation = $4, issue_date = $5, expiry_date = $6, status = $7, updated_at = NOW() WHERE id = $8',
+            [certificateSerial, passportNumber, holderName, occupation, issueDate, expiryDate, status, req.params.id]
         );
 
         res.json({ message: 'Certificate updated' });

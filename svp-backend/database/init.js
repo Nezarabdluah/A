@@ -35,6 +35,7 @@ const initDatabase = async () => {
                 certificate_serial VARCHAR(50) UNIQUE NOT NULL,
                 passport_number VARCHAR(50) NOT NULL,
                 holder_name VARCHAR(255),
+                occupation VARCHAR(255),
                 issue_date DATE,
                 expiry_date DATE,
                 status VARCHAR(20) DEFAULT 'Valid',

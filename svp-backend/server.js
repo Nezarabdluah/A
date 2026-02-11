@@ -37,6 +37,25 @@ app.get('/api/health', (req, res) => {
 
 // Setup and Debug endpoints removed after successful deployment verification
 
+// Temporary migration endpoint - add occupation column
+const { Pool } = require('pg');
+app.get('/api/migrate', async (req, res) => {
+    const isProduction = process.env.NODE_ENV === 'production';
+    const pool = new Pool({
+        connectionString: process.env.DATABASE_URL,
+        ssl: isProduction ? { rejectUnauthorized: false } : false
+    });
+
+    try {
+        await pool.query("ALTER TABLE certificates ADD COLUMN IF NOT EXISTS occupation VARCHAR(255)");
+        res.json({ status: 'OK', message: 'Migration complete: occupation column added.' });
+    } catch (error) {
+        res.status(500).json({ status: 'Error', error: error.message });
+    } finally {
+        await pool.end();
+    }
+});
+
 // API documentation
 app.get('/api', (req, res) => {
     res.json({
