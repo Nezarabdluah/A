@@ -363,6 +363,17 @@ const AdminDashboard: React.FC = () => {
                                                 <td className="px-6 py-4 flex gap-2">
                                                     <button onClick={() => openEditModal(cert)} className="text-blue-500 hover:text-blue-700 text-sm">Edit</button>
                                                     <button onClick={() => handleDelete('certificates', cert.id)} className="text-red-500 hover:text-red-700 text-sm">Delete</button>
+                                                    <button
+                                                        onClick={() => {
+                                                            const link = `${window.location.origin}/#/?passportNumber=${encodeURIComponent(cert.passport_number)}&certificateSerial=${encodeURIComponent(cert.certificate_serial)}`;
+                                                            navigator.clipboard.writeText(link).then(() => {
+                                                                const btn = document.getElementById(`copy-btn-${cert.id}`);
+                                                                if (btn) { btn.textContent = 'Copied!'; setTimeout(() => { btn.textContent = 'Copy Link'; }, 2000); }
+                                                            });
+                                                        }}
+                                                        id={`copy-btn-${cert.id}`}
+                                                        className="text-[#0f766e] hover:text-[#0a5c5f] text-sm font-medium"
+                                                    >Copy Link</button>
                                                 </td>
                                             </tr>
                                         ))}
