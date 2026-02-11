@@ -257,27 +257,11 @@ const CertificateVerificationModal = ({ isOpen, onClose }: { isOpen: boolean; on
             urlSerial = searchParams.get('certificateSerial');
         }
 
+        // Only pre-fill fields, user must click Verify
         if (urlPassport && urlSerial && !autoVerifyDone[0]) {
             setPassportNumber(urlPassport);
             setSerialNumber(urlSerial);
             autoVerifyDone[1](true);
-
-            // Auto-verify after setting values
-            setLoading(true);
-            fetch(
-                `https://anlash-backend.onrender.com/api/certificates/verify?passportNumber=${encodeURIComponent(urlPassport)}&certificateSerial=${encodeURIComponent(urlSerial)}`
-            )
-                .then(res => res.json())
-                .then(data => {
-                    setResult(data);
-                    setStep('result');
-                })
-                .catch(() => {
-                    setError('Connection failed.');
-                })
-                .finally(() => {
-                    setLoading(false);
-                });
         }
     }, [location.search]);
 
